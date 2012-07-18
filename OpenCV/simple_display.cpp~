@@ -1,0 +1,12 @@
+#include <cv.h>
+#include <highgui.h>
+
+int main(int argc, char** argv){
+	IplImage* img = cvLoadImage(argv[1]);
+	cvNamedWindow("MyWindow");
+	cvShowImage("MyWindow", img);
+	cvWaitKey(0);
+	cvDestroyWindow("MyWindow");
+	cvReleaseImage(&img);
+	return 0;
+}
