@@ -1,0 +1,73 @@
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/core/core.hpp>
+#include <iostream>
+#include <sstream>
+
+using namespace cv;
+using namespace std;
+
+int main(int argc, char** argv){
+
+	//-------------------------Checking for valid input-------------------------//
+
+	//check if we have enough arguments
+	if(argc < 3){
+		cout << "Not enough parameters" << endl;
+		return -1;
+	} 
+
+	//Load the image selected
+    Mat I, J;
+    if( argc == 4 && !strcmp(argv[3],"G") )
+        I = imread(argv[1], CV_LOAD_IMAGE_GRAYSCALE);
+    else
+        I = imread(argv[1], CV_LOAD_IMAGE_COLOR);
+
+	//Check if we have legitamite data in the image
+   if (!I.data){
+        cout << "The image" << argv[1] << " could not be loaded." << endl;
+        return -1;
+    }
+
+	//Figure out what we want to divide our values with (using the c method)
+    int divideWith;
+    stringstream s;
+    s << argv[2];
+    s >> divideWith;
+    if (!s){
+        cout << "Invalid number entered for dividing. " << endl;
+        return -1;
+    }
+
+	//-------------------------Creating the lookup tables-------------------------//
+
+	//creates the table 
+	uchar table[256];
+	for(int i =0; i < 256; ++i){
+		table[i] = divideWith * (i/divideWith);
+	}
+
+	//Create the lookup table that the LUT function uses
+	Mat lookUpTable(1,256,CV_8U);
+	uchar* p = lookUpTable.data;
+	for(int i = 0; i < 256; ++i){
+		p[i] = table[i];
+	}
+
+	//-------------------------Using the lookup table-------------------------//
+
+	//Use the lookup table
+    LUT(I, lookUpTable, J);
+
+	//-------------------------Displaying the output-------------------------//
+
+	//Create a window to see the difference from our color space reduction
+	namedWindow("Testing", CV_LOAD_IMAGE_COLOR);
+	imshow("Testing",I);			//Before
+	waitKey(0);
+
+	imshow("Testing",J);			//After
+	waitKey(0);
+
+	return 1;
+}
